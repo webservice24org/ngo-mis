@@ -1,9 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Users, Projector } from 'lucide-react'; // added Users icon
 
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+
 import {
     Sidebar,
     SidebarContent,
@@ -23,6 +24,16 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'User Management', // updated title
+        href: route('admin.users.index'), // use Inertia route helper
+        icon: Users, // new icon for users
+    },
+    {
+        title: 'Project Management', // new title for projects
+        href: route('admin.projects.index'), // use Inertia route helper
+        icon: Projector, // new icon for projects
     },
 ];
 

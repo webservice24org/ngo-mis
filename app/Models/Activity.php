@@ -21,4 +21,6 @@ class Activity extends Model
     {
         return $this->hasMany(Indicator::class);
     }
+
+
 }

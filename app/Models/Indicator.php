@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Activity;
+use App\Models\IndicatorValue;
 
 class Indicator extends Model
 {
@@ -15,4 +16,10 @@ class Indicator extends Model
     {
         return $this->belongsTo(Activity::class);
     }
+    public function values()
+    {
+        return $this->hasMany(IndicatorValue::class);
+    }
+
+
 }

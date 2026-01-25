@@ -13,8 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useForm } from "@inertiajs/react"
 import { useState } from "react"
-import toast from "react-hot-toast" // ✅ import toast
-
+import toast from "react-hot-toast"
 import {
   Select,
   SelectContent,
@@ -23,28 +22,30 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+interface EditUserProps {
+  user: any
+  roles: any[]
+}
 
-export function CreateUser({ roles }: any) {
-  const [open, setOpen] = useState(false) // ✅ control dialog open/close
+export function EditUser({ user, roles }: EditUserProps) {
+  const [open, setOpen] = useState(false)
 
-  const { data, setData, post, processing, errors, reset } = useForm({
-    name: "",
-    email: "",
-    password: "",
-    role: "",
+  const { data, setData, put, processing, errors } = useForm({
+    name: user.name,
+    email: user.email,
+    role: user.roles[0]?.name || "", // assuming single role
   })
 
   const submit = (e: React.MouseEvent) => {
     e.preventDefault()
 
-    post(route("admin.users.store"), {
+    put(route("admin.users.update", user.id), {
       onSuccess: () => {
-        reset()            // clear form
-        toast.success("User created successfully!") // show toast
-        setOpen(false)     // close dialog
+        toast.success("User updated successfully!")
+        setOpen(false)
       },
       onError: () => {
-        toast.error("Failed to create user. Check the form and try again.")
+        toast.error("Failed to update user.")
       },
     })
   }
@@ -52,12 +53,14 @@ export function CreateUser({ roles }: any) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)}>Create User</Button>
+        <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+          Edit
+        </Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create User</DialogTitle>
+          <DialogTitle>Edit User</DialogTitle>
         </DialogHeader>
 
         <Input
@@ -74,28 +77,19 @@ export function CreateUser({ roles }: any) {
         />
         {errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
 
-        <Input
-          type="password"
-          placeholder="Password"
-          value={data.password}
-          onChange={(e) => setData("password", e.target.value)}
-        />
-        {errors.password && <div className="text-red-500 text-sm">{errors.password}</div>}
-
         {/* Role */}
-        <div className="space-y-1">
+        <div className="mt-2 space-y-1">
           
-
           <Select
             value={data.role}
             onValueChange={(value) => setData("role", value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Select Role" />
             </SelectTrigger>
 
             <SelectContent>
-              {roles.map((role: any) => (
+              {roles.map((role) => (
                 <SelectItem key={role.id} value={role.name}>
                   {role.name}
                 </SelectItem>
@@ -106,8 +100,12 @@ export function CreateUser({ roles }: any) {
 
         {errors.role && <div className="text-red-500 text-sm">{errors.role}</div>}
 
-        <Button onClick={submit} disabled={processing}>
-          {processing ? "Saving..." : "Save"}
+        <Button
+          onClick={submit}
+          disabled={processing}
+          className="mt-4"
+        >
+          {processing ? "Updating..." : "Update"}
         </Button>
       </DialogContent>
     </Dialog>
