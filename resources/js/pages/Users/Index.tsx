@@ -126,7 +126,7 @@ export default function Users({ users, roles }: any) {
 
   /* Table Instance */
   const table = useReactTable({
-    data: users,
+    data: users ?? [],
     columns,
     state: { sorting, columnFilters },
     onSortingChange: setSorting,

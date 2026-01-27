@@ -1,11 +1,19 @@
+
 import AppLayout from "@/layouts/app-layout"
 import { CreateIndicatorValue } from "@/components/IndicatorValues/CreateIndicatorValue"
 import { Progress } from "@/components/ui/progress"
 import { IndicatorValuesTable } from "@/components/IndicatorValues/IndicatorValuesTable"
+import { IndicatorProgressChart } from "@/components/Indicators/IndicatorProgressChart"
+import { IndicatorLineChart } from "@/components/Indicators/IndicatorLineChart"
+
+
+
 
 export default function Index({ indicator, values, stats }: any) {
+  //console.log("VALUES FROM BACKEND:", values)
   return (
     <AppLayout
+    
       breadcrumbs={[
         { title: "Projects", href: "/admin/projects" },
         {
@@ -13,14 +21,21 @@ export default function Index({ indicator, values, stats }: any) {
           href: `/admin/projects/${indicator.activity.project.id}`,
         },
         {
-          title: indicator.activity.name,
+          title: "Activities",
           href: `/admin/projects/${indicator.activity.project.id}/activities`,
+        },
+        {
+          title: indicator.activity.name,
+          href: `/admin/activities/${indicator.activity.id}/indicators`,
         },
         {
           title: "Indicators",
           href: `/admin/activities/${indicator.activity.id}/indicators`,
         },
-        { title: indicator.name },
+        {
+          title: indicator.name,
+          href: `/admin/indicators/${indicator.id}/values`,
+        },
       ]}
     >
       <div className="p-6 space-y-6">
@@ -36,6 +51,29 @@ export default function Index({ indicator, values, stats }: any) {
 
           <CreateIndicatorValue indicatorId={indicator.id} />
         </div>
+
+        {/* CHART */}
+          <IndicatorProgressChart
+            values={values}
+            target={stats.target}
+            unit={indicator.unit}
+          />
+
+          {/* CHART */}
+          <div className="border rounded-lg p-4">
+            <h2 className="font-semibold mb-2">
+              Indicator Progress Over Time
+            </h2>
+
+            <IndicatorLineChart
+              data={values.map((v: any) => ({
+                date: v.reporting_date,
+                value: v.value,
+              }))}
+              target={indicator.target_value}
+            />
+          </div>
+
 
         {/* KPI CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

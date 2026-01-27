@@ -12,13 +12,14 @@ class Indicator extends Model
         'activity_id','name','indicator_type','baseline_value','target_value','unit'
     ];
 
-    public function activity()
-    {
-        return $this->belongsTo(Activity::class);
-    }
     public function values()
     {
         return $this->hasMany(IndicatorValue::class);
+    }
+
+    public function activity()
+    {
+        return $this->belongsTo(Activity::class);
     }
 
 

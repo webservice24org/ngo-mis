@@ -10,9 +10,25 @@ use App\Models\IndicatorValue;
 
 class IndicatorValueController extends Controller
 {
+    /* ---------------- INDEX (already OK) ---------------- */
+
     public function index(Indicator $indicator)
     {
-        $values = $indicator->values()->latest()->get();
+        $indicator->load('activity.project');
+
+        $values = $indicator->values()
+            ->with('collectedBy')
+            ->latest()
+            ->get();
+
+        $values = $indicator->values()
+            ->orderBy('reporting_date')
+            ->get()
+            ->map(fn ($v) => [
+                'date' => $v->reporting_date,
+                'value' => $v->value,
+            ]);
+
 
         $totalCollected = $values->sum('value');
 
@@ -32,11 +48,14 @@ class IndicatorValueController extends Controller
         ]);
     }
 
+    /* ---------------- STORE (already OK) ---------------- */
+
     public function store(Request $request, Indicator $indicator)
     {
         $data = $request->validate([
             'reporting_date' => 'required|date',
             'value' => 'required|integer|min:0',
+            'notes' => 'nullable|string',
         ]);
 
         $indicator->values()->create([
@@ -46,5 +65,28 @@ class IndicatorValueController extends Controller
 
         return back()->with('success', 'Value submitted');
     }
-}
 
+    /* ---------------- UPDATE ---------------- */
+
+    public function update(Request $request, IndicatorValue $indicatorValue)
+    {
+        $data = $request->validate([
+            'reporting_date' => 'required|date',
+            'value' => 'required|integer|min:0',
+            'notes' => 'nullable|string',
+        ]);
+
+        $indicatorValue->update($data);
+
+        return back()->with('success', 'Value updated');
+    }
+
+    /* ---------------- DELETE ---------------- */
+
+    public function destroy(IndicatorValue $indicatorValue)
+    {
+        $indicatorValue->delete();
+
+        return back()->with('success', 'Value deleted');
+    }
+}

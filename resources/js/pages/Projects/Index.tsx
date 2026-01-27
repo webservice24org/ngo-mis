@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react"
 import AppLayout from "@/layouts/app-layout"
 import { Button } from "@/components/ui/button"
@@ -101,7 +102,7 @@ export default function Index({ projects, donors, managers, enumerators }: any) 
               )}
 
               {paginatedProjects.map((project: any) => (
-                <TableRow key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-600 border-b">
+                <TableRow key={project.id} className="hover:bg-muted/50 border-b">
                   <TableCell className="font-medium border-r">
                     {project.name}
                   </TableCell>
@@ -131,6 +132,15 @@ export default function Index({ projects, donors, managers, enumerators }: any) 
                   <TableCell className="text-right border-r">
                     <div className="flex justify-end gap-2">
                       {/* Activities */}
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() =>
+                          router.visit(`/admin/projects/${project.id}`)
+                        }
+                      >
+                        View Project
+                      </Button>
                       <Button
                         size="sm"
                         variant="secondary"

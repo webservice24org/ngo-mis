@@ -10,15 +10,17 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { toast } from "react-hot-toast"
 
 export function EditIndicatorValue({ value }: any) {
   const [open, setOpen] = useState(false)
 
-  const { data, setData, put, processing, errors } = useForm({
+  const { data, setData, put, processing, errors, reset } = useForm({
+    reporting_date: value.reporting_date ?? "",
     value: value.value ?? "",
-    date: value.date ?? "",
     notes: value.notes ?? "",
   })
+
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -26,7 +28,11 @@ export function EditIndicatorValue({ value }: any) {
     put(
       `/admin/indicator-values/${value.id}`,
       {
-        onSuccess: () => setOpen(false),
+        onSuccess: () => {
+        toast.success("Indicator Value submitted successfully")
+        reset()
+        setOpen(false)
+      },
       }
     )
   }
@@ -49,12 +55,14 @@ export function EditIndicatorValue({ value }: any) {
             <Label>Date</Label>
             <Input
               type="date"
-              value={data.date}
-              onChange={(e) => setData("date", e.target.value)}
+              value={data.reporting_date}
+              onChange={(e) => setData("reporting_date", e.target.value)}
             />
-            {errors.date && (
-              <p className="text-sm text-red-500">{errors.date}</p>
+
+            {errors.reporting_date && (
+              <p className="text-sm text-red-500">{errors.reporting_date}</p>
             )}
+
           </div>
 
           <div>

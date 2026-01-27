@@ -57,10 +57,10 @@ export function IndicatorValuesTable({ values }: any) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Value</TableHead>
-              <TableHead>Collected By</TableHead>
-              <TableHead>Notes</TableHead>
+              <TableHead className="border-r">Date</TableHead>
+              <TableHead className="border-r">Value</TableHead>
+              <TableHead className="border-r">Collected By</TableHead>
+              <TableHead className="border-r">Notes</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -79,28 +79,39 @@ export function IndicatorValuesTable({ values }: any) {
 
             {paginatedValues.map((value: any) => (
               <TableRow key={value.id}>
-                <TableCell>{value.date}</TableCell>
 
-                <TableCell className="font-medium">
+                {/* Reporting Date */}
+                <TableCell className="border-r">
+                  {value.reporting_date}
+                </TableCell>
+
+                {/* Value */}
+                <TableCell className="font-medium border-r">
                   {value.value}
                 </TableCell>
 
-                <TableCell>
+                {/* Submitted By */}
+                <TableCell className="border-r">
                   {value.collected_by?.name ?? "-"}
                 </TableCell>
 
-                <TableCell className="text-muted-foreground">
+                {/* Notes */}
+                <TableCell className="text-muted-foreground border-r">
                   {value.notes ?? "-"}
                 </TableCell>
 
+                {/* Actions */}
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <EditIndicatorValue value={value} />
                     <DeleteIndicatorValue valueId={value.id} />
                   </div>
                 </TableCell>
+
               </TableRow>
             ))}
+
+
           </TableBody>
         </Table>
       </div>

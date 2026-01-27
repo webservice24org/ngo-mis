@@ -56,6 +56,17 @@ export function ActivitiesTable({ activities }: any) {
                     variant="secondary"
                     onClick={() =>
                       router.visit(
+                        route("admin.activities.show", activity.id)
+                      )
+                    }
+                  >
+                    View Activity
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() =>
+                      router.visit(
                         route("admin.activities.indicators.index", activity.id)
                       )
                     }

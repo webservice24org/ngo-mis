@@ -6,13 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class IndicatorValue extends Model
 {
-    protected $fillable = [
+     protected $fillable = [
         'indicator_id',
-        'reporting_date',
         'value',
+        'reporting_date',
         'submitted_by',
+        'notes',
     ];
 
+    public function collectedBy()
+    {
+        return $this->belongsTo(User::class, 'submitted_by');
+    }
     public function indicator()
     {
         return $this->belongsTo(Indicator::class);
@@ -22,5 +27,10 @@ class IndicatorValue extends Model
     {
         return $this->belongsTo(User::class, 'submitted_by');
     }
+
+    protected $casts = [
+    'reporting_date' => 'date:Y-m-d',
+];
+
 }
 

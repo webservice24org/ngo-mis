@@ -14,9 +14,12 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useState } from "react"
+import { toast } from "react-hot-toast"
 
 
 export function CreateIndicatorValue({ indicatorId }: any) {
+  const [open, setOpen] = useState(false)
   const { data, setData, post, processing, reset } = useForm({
     reporting_date: "",
     value: "",
@@ -24,12 +27,16 @@ export function CreateIndicatorValue({ indicatorId }: any) {
 
   const submit = () => {
     post(route("admin.indicators.values.store", indicatorId), {
-      onSuccess: () => reset(),
+      onSuccess: () => {
+        toast.success("Indicator Value submitted successfully")
+        reset()
+        setOpen(false)
+      },
     })
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>Add Value</Button>
       </DialogTrigger>
