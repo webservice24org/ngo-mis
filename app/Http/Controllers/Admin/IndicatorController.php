@@ -12,21 +12,21 @@ class IndicatorController extends Controller
      * Display indicators for a specific activity
      */
     public function index(Activity $activity)
-{
-    return inertia('Indicators/Index', [
-        'activity' => $activity,
-        'indicators' => $activity->indicators()->latest()->get(),
+    {
+        return inertia('Indicators/Index', [
+            'activity' => $activity,
+            'indicators' => $activity->indicators()->latest()->get(),
 
-        // KPI summary
-        'kpis' => [
-            'total' => $activity->indicators()->count(),
-            'output' => $activity->indicators()->where('indicator_type', 'output')->count(),
-            'outcome' => $activity->indicators()->where('indicator_type', 'outcome')->count(),
-            'target_sum' => $activity->indicators()->sum('target_value'),
-            'baseline_sum' => $activity->indicators()->sum('baseline_value'),
-        ],
-    ]);
-}
+            // KPI summary
+            'kpis' => [
+                'total' => $activity->indicators()->count(),
+                'output' => $activity->indicators()->where('indicator_type', 'output')->count(),
+                'outcome' => $activity->indicators()->where('indicator_type', 'outcome')->count(),
+                'target_sum' => $activity->indicators()->sum('target_value'),
+                'baseline_sum' => $activity->indicators()->sum('baseline_value'),
+            ],
+        ]);
+    }
 
 
     /**

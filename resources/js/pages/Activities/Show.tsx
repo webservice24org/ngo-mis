@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { IndicatorChartModal } from "@/components/Indicators/IndicatorChartModal"
+import { router } from '@inertiajs/react';
 
 import {
   Table,
@@ -12,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { IndicatorAnalyticsCard } from "@/components/Indicators/IndicatorAnalyticsCard"
 
 export default function Show({ activity, indicators, stats }: any) {
   return (
@@ -64,6 +66,16 @@ export default function Show({ activity, indicators, stats }: any) {
             }
           />
         </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {indicators.map((indicator: any) => (
+          <IndicatorAnalyticsCard
+            key={indicator.id}
+            indicator={indicator}
+          />
+        ))}
+      </div>
+
 
         {/* INDICATORS TABLE */}
           <div className="border rounded-lg overflow-hidden">

@@ -5,11 +5,13 @@ import { Progress } from "@/components/ui/progress"
 import { IndicatorValuesTable } from "@/components/IndicatorValues/IndicatorValuesTable"
 import { IndicatorProgressChart } from "@/components/Indicators/IndicatorProgressChart"
 import { IndicatorLineChart } from "@/components/Indicators/IndicatorLineChart"
+import { IndicatorAnalyticsCard } from "@/components/Indicators/IndicatorAnalyticsCard"
+import { IndicatorTrendChart } from "@/components/Indicators/IndicatorTrendChart"
 
 
 
 
-export default function Index({ indicator, values, stats }: any) {
+export default function Index({ indicator, values, stats, timeSeries }: any) {
   //console.log("VALUES FROM BACKEND:", values)
   return (
     <AppLayout
@@ -45,7 +47,7 @@ export default function Index({ indicator, values, stats }: any) {
           <div>
             <h1 className="text-2xl font-bold">{indicator.name}</h1>
             <p className="text-muted-foreground">
-              {indicator.indicator_type.toUpperCase()} indicator
+              Unit: {indicator.unit}
             </p>
           </div>
 
@@ -89,6 +91,17 @@ export default function Index({ indicator, values, stats }: any) {
             </div>
           </StatCard>
         </div>
+
+        <IndicatorAnalyticsCard indicator={indicator} />
+        
+
+        {/* TREND CHART */}
+        <IndicatorTrendChart
+          data={timeSeries}
+          unit={indicator.unit}
+        />
+
+
 
         {/* VALUES TABLE */}
         <IndicatorValuesTable values={values} />

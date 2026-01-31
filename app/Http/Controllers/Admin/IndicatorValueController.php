@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Indicator;
 use App\Models\IndicatorValue;
+use App\Services\IndicatorAnalyticsService;
 
 
 class IndicatorValueController extends Controller
@@ -13,40 +14,65 @@ class IndicatorValueController extends Controller
     /* ---------------- INDEX (already OK) ---------------- */
 
     public function index(Indicator $indicator)
-    {
-        $indicator->load('activity.project');
+{
+    // Load hierarchy for breadcrumbs
+    $indicator->load('activity.project');
 
-        $values = $indicator->values()
-            ->with('collectedBy')
-            ->latest()
-            ->get();
+    // Indicator values (table + charts)
+    $values = $indicator->values()
+        ->with('collectedBy')
+        ->orderBy('reporting_date')
+        ->get();
 
-        $values = $indicator->values()
-            ->orderBy('reporting_date')
-            ->get()
-            ->map(fn ($v) => [
-                'date' => $v->reporting_date,
-                'value' => $v->value,
-            ]);
+    // 🔥 STEP 17A — Time-series analytics (for line / trend charts)
+    $timeSeries = $values->map(fn ($v) => [
+        'date' => $v->reporting_date,
+        'value' => $v->value,
+    ]);
+
+    // 🔥 STEP 16 — KPI + Analytics
+    $baseline = $indicator->baseline_value ?? 0;
+    $target = $indicator->target_value ?? 0;
+    $current = $values->sum('value');
+
+    $progress = $target > 0
+        ? round(($current / $target) * 100, 2)
+        : 0;
+
+    $gap = max($target - $current, 0);
+
+    return inertia('IndicatorValues/Index', [
+        // 🔥 Structured analytics object (UI-ready)
+        'indicator' => [
+            'id' => $indicator->id,
+            'name' => $indicator->name,
+            'unit' => $indicator->unit,
+            'direction' => $indicator->direction ?? 'increase',
+
+            // analytics
+            'baseline' => $baseline,
+            'current' => $current,
+            'target' => $target,
+            'progress' => $progress,
+            'gap' => $gap,
+
+            // relationships for breadcrumbs
+            'activity' => $indicator->activity,
+        ],
+
+        'values' => $values,         // table
+        'timeSeries' => $timeSeries, // charts
+
+        'stats' => [
+            'baseline' => $baseline,
+            'target' => $target,
+            'collected' => $current,
+            'achievement' => $progress,
+        ],
+    ]);
+}
 
 
-        $totalCollected = $values->sum('value');
-
-        $achievement = $indicator->target_value
-            ? round(($totalCollected / $indicator->target_value) * 100, 2)
-            : 0;
-
-        return inertia('IndicatorValues/Index', [
-            'indicator' => $indicator,
-            'values' => $values,
-            'stats' => [
-                'baseline' => $indicator->baseline_value,
-                'target' => $indicator->target_value,
-                'collected' => $totalCollected,
-                'achievement' => $achievement,
-            ],
-        ]);
-    }
 
     /* ---------------- STORE (already OK) ---------------- */
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\Activity;
 use Inertia\Inertia;
+use App\Services\IndicatorAnalyticsService;
 
 
 class ActivityController extends Controller
@@ -96,6 +97,21 @@ class ActivityController extends Controller
                 'avg_achievement' => round($overallAchievement, 1),
             ],
         ]);
+
+        
+
+        $activity->load(['indicators.values']);
+
+        $indicators = $activity->indicators->map(function ($indicator) {
+            return [
+                'id' => $indicator->id,
+                'name' => $indicator->name,
+                'unit' => $indicator->unit,
+                'direction' => $indicator->direction,
+                ...IndicatorAnalyticsService::calculate($indicator),
+            ];
+        });
+
     }
 
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\User;
 use Inertia\Inertia;
+use App\Services\IndicatorAnalyticsService;
 
 class ProjectController extends Controller
 {
@@ -101,61 +102,76 @@ class ProjectController extends Controller
 
 
     public function show(Project $project)
-{
-    $project->load([
-        'activities.indicators.values'
-    ]);
+    {
+        $project->load([
+            'activities.indicators.values'
+        ]);
 
-    $activities = $project->activities->map(function ($activity) {
+        $activities = $project->activities->map(function ($activity) {
 
-        $indicators = $activity->indicators->map(function ($indicator) {
-            $collected = $indicator->values->sum('value');
-            $target = $indicator->target_value ?? 0;
+            $indicators = $activity->indicators->map(function ($indicator) {
+                $collected = $indicator->values->sum('value');
+                $target = $indicator->target_value ?? 0;
 
-            $achievement = $target > 0
-                ? round(($collected / $target) * 100, 1)
-                : 0;
+                $achievement = $target > 0
+                    ? round(($collected / $target) * 100, 1)
+                    : 0;
+
+                return [
+                    'id' => $indicator->id,
+                    'name' => $indicator->name,
+                    'achievement' => $achievement,
+                    'target' => $target,
+                    'collected' => $collected,
+                    'values' => $indicator->values->map(fn ($v) => [
+                        'date' => $v->reporting_date,
+                        'value' => $v->value,
+                    ]),
+                ];
+            });
+
+            $avgAchievement = $indicators->avg('achievement') ?? 0;
 
             return [
-                'id' => $indicator->id,
-                'name' => $indicator->name,
-                'achievement' => $achievement,
-                'target' => $target,
-                'collected' => $collected,
-                'values' => $indicator->values->map(fn ($v) => [
-                    'date' => $v->reporting_date,
-                    'value' => $v->value,
-                ]),
+                'id' => $activity->id,
+                'name' => $activity->name,
+                'avg_achievement' => round($avgAchievement, 1),
+                'indicators' => $indicators,
             ];
         });
 
-        $avgAchievement = $indicators->avg('achievement') ?? 0;
+        /* ---------- Project KPIs ---------- */
+        $allIndicators = $activities->flatMap(fn ($a) => $a['indicators']);
 
-        return [
-            'id' => $activity->id,
-            'name' => $activity->name,
-            'avg_achievement' => round($avgAchievement, 1),
-            'indicators' => $indicators,
-        ];
-    });
+        $projectAchievement = $allIndicators->avg('achievement') ?? 0;
 
-    /* ---------- Project KPIs ---------- */
-    $allIndicators = $activities->flatMap(fn ($a) => $a['indicators']);
+        return inertia('Projects/Show', [
+            'project' => $project,
+            'activities' => $activities,
+            'stats' => [
+                'activities' => $project->activities->count(),
+                'indicators' => $allIndicators->count(),
+                'avg_achievement' => round($projectAchievement, 1),
+                'on_track' => $allIndicators->where('achievement', '>=', 80)->count(),
+                'off_track' => $allIndicators->where('achievement', '<', 80)->count(),
+            ],
+        ]);
 
-    $projectAchievement = $allIndicators->avg('achievement') ?? 0;
+        
 
-    return inertia('Projects/Show', [
-        'project' => $project,
-        'activities' => $activities,
-        'stats' => [
-            'activities' => $project->activities->count(),
-            'indicators' => $allIndicators->count(),
-            'avg_achievement' => round($projectAchievement, 1),
-            'on_track' => $allIndicators->where('achievement', '>=', 80)->count(),
-            'off_track' => $allIndicators->where('achievement', '<', 80)->count(),
-        ],
-    ]);
-}
+        $activity->load(['indicators.values']);
+
+        $indicators = $activity->indicators->map(function ($indicator) {
+            return [
+                'id' => $indicator->id,
+                'name' => $indicator->name,
+                'unit' => $indicator->unit,
+                'direction' => $indicator->direction,
+                ...IndicatorAnalyticsService::calculate($indicator),
+            ];
+        });
+
+    }
 
 
     public function destroy(Project $project)
