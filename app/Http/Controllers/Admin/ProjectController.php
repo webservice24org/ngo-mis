@@ -7,33 +7,66 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\User;
 use Inertia\Inertia;
+use App\Models\Location;
 use App\Services\IndicatorAnalyticsService;
 
 class ProjectController extends Controller
 {
-    public function index()
-    {
-        return inertia('Projects/Index', [
-            'projects' => Project::with(['donor', 'users'])->get()->map(function ($project) {
-                return [
-                    ...$project->toArray(),
 
-                    // normalize relations for frontend
-                    'manager' => $project->users
-                        ->where('pivot.role', 'manager')
-                        ->values(),
+public function index(Request $request)
+{
+    $locations = Location::with('children.children.children')
+        ->whereNull('parent_id')
+        ->get();
 
-                    'team' => $project->users
-                        ->where('pivot.role', 'team')
-                        ->values(),
-                ];
-            }),
+    $query = Project::with(['donor', 'users', 'locations']);
 
-            'donors' => User::role('Donor')->get(),
-            'managers' => User::role('Project Manager')->get(),
-            'enumerators' => User::role('Enumerator')->get(),
-        ]);
+    if ($request->location_ids) {
+
+        $ids = collect($request->location_ids);
+
+        // 🔥 include children recursively
+        $allLocationIds = Location::whereIn('id', $ids)
+            ->with('descendants')
+            ->get()
+            ->flatMap(function ($location) {
+                return collect([$location->id])
+                    ->merge($location->descendants->pluck('id'));
+            })
+            ->unique();
+
+        $query->whereHas('locations', function ($q) use ($allLocationIds) {
+            $q->whereIn('locations.id', $allLocationIds);
+        });
     }
+
+    $projects = $query->get()->map(function ($project) {
+        return [
+            ...$project->toArray(),
+
+            'manager' => $project->users
+                ->where('pivot.role', 'manager')
+                ->values(),
+
+            'team' => $project->users
+                ->where('pivot.role', 'team')
+                ->values(),
+
+            'location_ids' => $project->locations->pluck('id')->values()->all(),
+        ];
+    });
+
+    return inertia('Projects/Index', [
+        'projects' => $projects,
+        'locations' => $locations,
+        'filters' => [
+            'location_ids' => $request->location_ids ?? [],
+        ],
+        'donors' => User::role('Donor')->get(),
+        'managers' => User::role('Project Manager')->get(),
+        'enumerators' => User::role('Enumerator')->get(),
+    ]);
+}
 
 
     public function store(Request $request)
@@ -41,9 +74,11 @@ class ProjectController extends Controller
         $data = $request->validate([
             'name' => 'required',
             'code' => 'required|unique:projects',
-            'user_id' => 'required|exists:users,id', // donor
+            'user_id' => 'required|exists:users,id',
             'manager_id' => 'required|exists:users,id',
             'team_ids' => 'array',
+            'location_ids' => 'array',
+            'location_ids.*' => 'exists:locations,id',
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'status' => 'required|string',
@@ -61,44 +96,55 @@ class ProjectController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-
         // assign manager
         $project->users()->attach($data['manager_id'], ['role' => 'manager']);
 
         // assign team
-        if (!empty($data['team_ids'])) {
-            foreach ($data['team_ids'] as $userId) {
-                $project->users()->attach($userId, ['role' => 'team']);
-            }
+        foreach ($data['team_ids'] ?? [] as $userId) {
+            $project->users()->attach($userId, ['role' => 'team']);
+        }
+
+        // 🔥 assign locations
+        if (!empty($data['location_ids'])) {
+            $project->locations()->sync($data['location_ids']);
         }
 
         return back()->with('success', 'Project created successfully');
     }
 
+
     public function update(Request $request, Project $project)
     {
-        $project->update(
-            $request->only(
-                'name',
-                'code',
-                'user_id',
-                'start_date',
-                'end_date',
-                'status',
-                'description'
-            )
-        );
+        $data = $request->validate([
+            'name' => 'required',
+            'code' => 'required|unique:projects,code,' . $project->id,
+            'user_id' => 'required|exists:users,id',
+            'manager_id' => 'required|exists:users,id',
+            'team_ids' => 'array',
+            'location_ids' => 'array',
+            'location_ids.*' => 'exists:locations,id',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'status' => 'required|string',
+            'description' => 'nullable|string',
+        ]);
 
+        $project->update($data);
+
+        // reset users
         $project->users()->detach();
+        $project->users()->attach($data['manager_id'], ['role' => 'manager']);
 
-        $project->users()->attach($request->manager_id, ['role' => 'manager']);
-
-        foreach ($request->team_ids ?? [] as $userId) {
+        foreach ($data['team_ids'] ?? [] as $userId) {
             $project->users()->attach($userId, ['role' => 'team']);
         }
 
-        return back()->with('success', 'Project updated');
+        // 🔥 sync locations
+        $project->locations()->sync($data['location_ids'] ?? []);
+
+        return back()->with('success', 'Project updated successfully');
     }
+
 
 
     public function show(Project $project)

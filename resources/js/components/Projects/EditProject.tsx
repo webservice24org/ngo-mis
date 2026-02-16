@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "@inertiajs/react"
 import { useState } from "react"
 import toast from "react-hot-toast"
+import { LocationSelector } from "@/components/Locations/LocationSelector"
 
 
-export function EditProject({ project, donors, managers = [], enumerators = [] }: any) {
+export function EditProject({ project, donors, managers = [], enumerators = [], locations }: any) {
   const [open, setOpen] = useState(false)
 
   const { data, setData, put, processing, errors } = useForm({
@@ -26,6 +27,7 @@ export function EditProject({ project, donors, managers = [], enumerators = [] }
     description: project.description ?? "",
     manager_id: project.manager?.[0]?.id ?? "",
     team_ids: project.team?.map((u: any) => u.id) ?? [],
+    location_ids: project.location_ids ?? [],
     })
 
 
@@ -178,6 +180,15 @@ export function EditProject({ project, donors, managers = [], enumerators = [] }
           })}
         </div>
       </div>
+
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Project Locations</label>
+        <LocationSelector
+          locations={locations}
+          selected={data.location_ids}
+          onChange={(ids) => setData("location_ids", ids)}
+        />
+        </div>
 
       {/* Status */}
       <div className="space-y-1">

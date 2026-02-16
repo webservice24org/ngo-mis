@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\IndicatorController;
 use App\Http\Controllers\Admin\IndicatorValueController;
+use App\Http\Controllers\Admin\LocationController;
 
 
 Route::get('/', function () {
@@ -54,6 +55,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('indicators/{indicator}/values',[IndicatorValueController::class, 'store'])->name('indicators.values.store');
         Route::put('indicator-values/{indicatorValue}',[IndicatorValueController::class, 'update'])->name('indicator-values.update');
         Route::delete('indicator-values/{indicatorValue}',[IndicatorValueController::class, 'destroy'])->name('indicator-values.destroy');
+
+        Route::get('locations', [LocationController::class, 'index'])->name('locations.index');
+        Route::post('locations', [LocationController::class, 'store'])->name('locations.store');
 
 
 

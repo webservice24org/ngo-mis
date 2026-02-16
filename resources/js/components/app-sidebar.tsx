@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, Projector } from 'lucide-react'; // added Users icon
+import { BookOpen, Folder, LayoutGrid, Users, Projector, MapPinHouse } from 'lucide-react'; // added Users icon
 
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -35,6 +35,11 @@ const mainNavItems: NavItem[] = [
         href: route('admin.projects.index'), // use Inertia route helper
         icon: Projector, // new icon for projects
     },
+    {
+        title: 'Location Management',
+        href:route('admin.locations.index'),
+        icon: MapPinHouse,
+    }
 ];
 
 const footerNavItems: NavItem[] = [

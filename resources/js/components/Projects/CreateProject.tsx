@@ -11,22 +11,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useForm } from "@inertiajs/react"
 import { useState } from "react"
 import toast from "react-hot-toast"
+import { LocationSelector } from "@/components/Locations/LocationSelector"
 
-export function CreateProject({ donors, managers, enumerators }: any) {
+export function CreateProject({ donors, managers, enumerators, locations}: any) {
   const [open, setOpen] = useState(false)
+  
+
 
   const { data, setData, post, reset, processing, errors } = useForm({
-    name: "",
-    code: "",
-    description: "",
-    start_date: "",
-    end_date: "",
-    user_id: "",
-    manager_id: "",
-    team_ids: [] as number[],
-    status: "active",
-    
-  })
+  name: "",
+  code: "",
+  description: "",
+  start_date: "",
+  end_date: "",
+  user_id: "",
+  manager_id: "",
+  team_ids: [] as number[],
+  location_ids: [] as number[], // 🔥 FIX HERE
+  status: "active",
+})
+
 
   const submit = () => {
     post(route("admin.projects.store"), {
@@ -161,6 +165,16 @@ export function CreateProject({ donors, managers, enumerators }: any) {
           </div>
         </div>
 
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Project Locations</label>
+
+            <LocationSelector
+              locations={locations ?? []}
+              selected={data.location_ids ?? []}
+              onChange={(ids) => setData("location_ids", ids)}
+            />
+
+          </div>
 
         {/* Status */}
         <div className="space-y-1">

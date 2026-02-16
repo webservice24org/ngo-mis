@@ -55,6 +55,16 @@ class Project extends Model
         return $this->hasMany(Beneficiary::class);
     }
 
+    public function locations()
+    {
+        return $this->belongsToMany(
+            Location::class,
+            'project_location' // 👈 explicit pivot table name
+        );
+    }
+
+
+
     public function forms()
     {
         return $this->hasMany(Form::class);
