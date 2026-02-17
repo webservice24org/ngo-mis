@@ -21,4 +21,10 @@ class Form extends Model
     {
         return $this->hasMany(FormSubmission::class);
     }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
+
 }

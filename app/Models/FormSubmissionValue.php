@@ -10,5 +10,8 @@ class FormSubmissionValue extends Model
         'submission_id','field_name','value'
     ];
 
-    
+    public function field()
+    {
+        return $this->belongsTo(FormField::class, 'form_field_id');
+    }
 }

@@ -280,6 +280,17 @@ export default function Index({
                       >
                         beneficiaries
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() =>
+                          router.visit(`/admin/projects/${project.id}/forms`)
+                        }
+                      >
+                        Forms
+                      </Button>
+                      
+
 
                       <EditProject
                         project={project}

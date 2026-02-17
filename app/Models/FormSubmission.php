@@ -15,4 +15,11 @@ class FormSubmission extends Model
     {
         return $this->hasMany(FormSubmissionValue::class, 'submission_id');
     }
+
+    public function form()
+    {
+        return $this->belongsTo(Form::class);
+    }
+    
+
 }
