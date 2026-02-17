@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\ActivityController;
 use App\Http\Controllers\Admin\IndicatorController;
 use App\Http\Controllers\Admin\IndicatorValueController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\ProjectBeneficiaryController;
+
 
 
 Route::get('/', function () {
@@ -62,6 +64,20 @@ Route::middleware(['auth'])->group(function () {
 
 
     });
+
+    Route::prefix('admin/projects/{project}')
+    ->group(function () {
+        Route::get('beneficiaries', [ProjectBeneficiaryController::class, 'index'])
+            ->name('projects.beneficiaries.index');
+
+        Route::post('beneficiaries', [ProjectBeneficiaryController::class, 'store'])
+        ->name('projects.beneficiaries.store');
+
+        Route::put('beneficiaries/{beneficiary}', [ProjectBeneficiaryController::class, 'update'])
+            ->name('projects.beneficiaries.update');
+
+    });
+
 
     Route::middleware('role:M&E Officer')->group(function () {
         // M&E routes

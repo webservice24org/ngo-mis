@@ -206,12 +206,12 @@ export default function Index({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Code</TableHead>
-                <TableHead>Donor</TableHead>
-                <TableHead>Manager</TableHead>
-                <TableHead>Locations</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="border-r">Name</TableHead>
+                <TableHead className="border-r">Code</TableHead>
+                <TableHead className="border-r">Donor</TableHead>
+                <TableHead className="border-r">Manager</TableHead>
+                <TableHead className="border-r">Locations</TableHead>
+                <TableHead className="border-r">Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -228,11 +228,11 @@ export default function Index({
 
               {paginatedProjects.map((project: any) => (
                 <TableRow key={project.id}>
-                  <TableCell>{project.name}</TableCell>
-                  <TableCell>{project.code}</TableCell>
-                  <TableCell>{project.donor?.name ?? "-"}</TableCell>
+                  <TableCell className="border-r">{project.name}</TableCell>
+                  <TableCell className="border-r">{project.code}</TableCell>
+                  <TableCell className="border-r">{project.donor?.name ?? "-"}</TableCell>
 
-                  <TableCell className="space-x-1">
+                  <TableCell className="space-x-1 border-r">
                     {project.manager?.map((m: any) => (
                       <Badge key={m.id} variant="secondary">
                         {m.name}
@@ -240,7 +240,7 @@ export default function Index({
                     ))}
                   </TableCell>
 
-                  <TableCell className="space-x-1">
+                  <TableCell className="space-x-1 border-r">
                     {project.locations?.map((loc: any) => (
                       <Badge key={loc.id} variant="outline">
                         {loc.name}
@@ -248,7 +248,7 @@ export default function Index({
                     ))}
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="border-r">
                     <Badge
                       variant={
                         project.status === "active"
@@ -270,6 +270,15 @@ export default function Index({
                         }
                       >
                         View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() =>
+                          router.visit(`/admin/projects/${project.id}/beneficiaries`)
+                        }
+                      >
+                        beneficiaries
                       </Button>
 
                       <EditProject

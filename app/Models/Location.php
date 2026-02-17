@@ -25,6 +25,11 @@ class Location extends Model
         return $this->hasMany(Location::class, 'parent_id');
     }
     
+    public function childrenRecursive()
+    {
+        return $this->children()->with('childrenRecursive');
+    }
+    
     public function projects()
     {
         return $this->belongsToMany(
@@ -34,10 +39,16 @@ class Location extends Model
     }
 
     public function descendants()
-{
-    return $this->hasMany(Location::class, 'parent_id')
-        ->with('descendants');
-}
+    {
+        return $this->hasMany(Location::class, 'parent_id')
+            ->with('descendants');
+    }
+
+
+    
+
+
+
 
 
 
