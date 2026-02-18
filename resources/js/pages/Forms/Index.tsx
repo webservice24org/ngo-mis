@@ -1,4 +1,4 @@
-
+declare function route(name: string, params?: any): string
 import AppLayout from "@/layouts/app-layout"
 import { Link, Head } from "@inertiajs/react";
 

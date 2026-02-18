@@ -39,16 +39,35 @@ class FormController extends Controller
             'description' => $request->description,
         ]);
 
-        return redirect()->route('forms.builder', [$project, $form]);
+        return redirect()
+        ->route('admin.projects.forms.index', $project)
+        ->with('success', 'Form created successfully.');
     }
 
     public function builder(Project $project, Form $form)
     {
+        $form->load([
+            'fields' => fn ($q) => $q->orderBy('order')
+        ]);
+
         return Inertia::render('Forms/Builder', [
             'project' => $project,
-            'form' => $form->load('fields'),
+            'form' => $form
         ]);
     }
+
+    public function reorderFields(Request $request, Project $project, Form $form)
+    {
+        foreach ($request->fields as $index => $id) {
+            $form->fields()
+                ->where('id', $id)
+                ->update(['order' => $index]);
+        }
+
+        return back()->with('success', 'Fields reordered successfully.');
+    }
+
+
 
 
     public function storeField(Request $request, Project $project, Form $form)
@@ -68,8 +87,42 @@ class FormController extends Controller
             'order' => $form->fields()->count() + 1,
         ]);
 
-        return back();
+        return back()->with('success', 'Field added successfully.');
     }
+
+        public function updateField(
+        Request $request,
+        Project $project,
+        Form $form,
+        FormField $field
+        ) {
+        $data = $request->validate([
+            'label' => 'required|string',
+            'field_type' => 'required|string',
+            'is_required' => 'boolean',
+            'options' => 'nullable|array',
+            'conditional_field_id' => 'nullable|integer',
+            'conditional_value' => 'nullable|string',
+        ]);
+
+        $field->update($data);
+
+        return back()->with('success', 'Field updated successfully.');
+    }
+
+    public function duplicateField(
+        Project $project,
+        Form $form,
+        FormField $field
+    ) {
+        $new = $field->replicate();
+        $new->label = $field->label . ' (Copy)';
+        $new->order = $form->fields()->max('order') + 1;
+        $new->save();
+
+        return back()->with('success', 'Field duplicated successfully.');
+    }
+
 
     public function destroyField(Project $project, Form $form, FormField $field)
     {

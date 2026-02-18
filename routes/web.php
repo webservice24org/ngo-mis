@@ -213,8 +213,21 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/{form}/fields', [FormController::class, 'storeField'])
                     ->name('fields.store');
 
+                Route::put('/{form}/fields/{field}',
+                        [FormController::class, 'updateField']
+                    )->name('fields.update');
+
+                    Route::post('{form}/fields/{field}/duplicate',
+                        [FormController::class, 'duplicateField']
+                    )->name('fields.duplicate');
+
+
                 Route::delete('/{form}/fields/{field}', [FormController::class, 'destroyField'])
                     ->name('fields.destroy');
+
+                    Route::post('{form}/fields/reorder',
+                        [FormController::class, 'reorderFields']
+                    )->name('fields.reorder');
 
                 /*
                 |--------------------------------------------------------------------------
